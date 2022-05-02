@@ -35,9 +35,6 @@ export default function App() {
         <Breadcrumb style={{ margin: '16px 0' }}>
           <Breadcrumb.Item>Dog</Breadcrumb.Item>
         </Breadcrumb>
-      </Content>
-
-      <Content>
         <Routes>
           <Route exact path="/" element={<DogScreen />} />
           <Route path="/dog" element={<DogScreen />} />
