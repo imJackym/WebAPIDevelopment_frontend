@@ -2,7 +2,7 @@ import { Card, Col, Row, Avatar, Button } from 'antd';
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import data from './data_dog';
+// import data from './data_dog';
 
 const { Meta } = Card;
 
@@ -18,8 +18,6 @@ const cardStyle = {
 
 function DogScreen() {
 
-  // const dogs = [1,2,34,54,56,1];
-
   const [dogs, setDogs] = useState([]);
   useEffect(() => {
     console.log("useEffectuseEffect");
@@ -30,8 +28,7 @@ function DogScreen() {
     };
     fetchData();
   }, []);
-  console.log("dogs : " + dogs);
-
+  
   return (
     <div>
       <div>
@@ -41,7 +38,7 @@ function DogScreen() {
       </div>
       <br />
       {
-        data.dogs.map((dog) => (
+        dogs.data?.map((dog) => (
           <div className="dog" key={dog.id}>
             <a href={`/dog/${dog.id}`}>
               <Card.Grid style={gridStyle}>
