@@ -1,8 +1,7 @@
-import { Card, Col, Row, Avatar, Button } from 'antd';
+import { Card, Button } from 'antd';
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-// import data from './data_dog';
 
 const { Meta } = Card;
 
@@ -40,13 +39,13 @@ function DogScreen() {
       {
         dogs.data?.map((dog) => (
           <div className="dog" key={dog.id}>
-            <a href={`/dog/${dog.id}`}>
+            <Link to={`/api/v1/dog/${dog.id}`}>
               <Card.Grid style={gridStyle}>
                 <Card style={cardStyle} cover={<img alt="example" src="https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png" />}>
                   <Meta title={`${dog.name}`} description={`${dog.brand}`} />
                 </Card>
               </Card.Grid>
-            </a>
+            </Link>
           </div>
         ))
       }
