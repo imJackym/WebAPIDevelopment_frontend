@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Form, Input, Button } from 'antd';
+import { Link } from 'react-router-dom';
 import Axios from 'axios';
 
 function DogScreen() {
@@ -36,7 +37,7 @@ function DogScreen() {
 
   let handleSubmit = async (e) => {
     try {
-      const { data } = await Axios.post('http://localhost:5005/api/v1/dog/res/', {
+      const { data } = await Axios.post('http://localhost:5005/api/v1/dog/add', {
         name,
         category,
         brand,
@@ -87,6 +88,8 @@ function DogScreen() {
           <Button type="primary" htmlType="submit"> Register </Button>
           &nbsp;&nbsp;
           <Button type="primary" danger htmlType="reset" onClick={onReset}> Reset </Button>
+          &nbsp;&nbsp;
+          <Button htmlType="reset"><Link to="/dog"> Back </Link></Button>
         </Form.Item>
       </Form>
     </div>
