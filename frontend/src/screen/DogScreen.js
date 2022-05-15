@@ -39,7 +39,6 @@ export default function DogScreen() {
 
   const [{ loading, error, dogs }, dispatch] = useReducer(reducer, {
     dogs: [],
-    ad: null,
     loading: true,
     error: '',
   });
