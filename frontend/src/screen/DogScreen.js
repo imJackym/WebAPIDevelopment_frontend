@@ -76,23 +76,18 @@ export default function DogScreen() {
         </Button>
         &nbsp;
         {
-          userInfo.isAdmin ? (
+          userInfo ? userInfo.isAdmin ? (
             <Button type="primary">
               <Link to="/dog_add">Add new dog</Link>
             </Button>
-          ) : (
-            <></>
-          )
+          ) : (<></>) : (<></>)
         }
-
-        &nbsp;
-
       </div>
       <br />
       {
         dogs?.map((dog) => (
           <div className="dog" key={`${dog.id}`}>
-            <Link to={`/dog/${dog.id}`}>
+            <Link to={`/dog/${dog._id}`}>
               <Card.Grid style={gridStyle}>
                 <Card style={cardStyle} cover={<img alt="example" src="https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png" />}>
                   <Meta title={`${dog.name}`} description={`${dog.breed}`} />
