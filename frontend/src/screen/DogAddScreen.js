@@ -1,15 +1,22 @@
-import React, { useState } from 'react';
-import { Form, Input, Button } from 'antd';
+import React, { useState, useContext, useEffect } from 'react';
+import { Store } from '../Store';
+import { Form, Input, Button, Select } from 'antd';
 import { Link } from 'react-router-dom';
 import Axios from 'axios';
 
-function DogScreen() {
+const { Option } = Select;
+
+function DogAddScreen() {
   const [name, setName] = useState("");
-  const [category, setCategory] = useState("");
-  const [brand, setBrand] = useState("");
+  const [breed, setBreed] = useState("");
   const [description, setDescription] = useState("");
+  const [adoption, setAdoption] = useState("");
   const [image, setImage] = useState("");
+  const [images, setImages] = useState("");
   const [form] = Form.useForm();
+
+  const { state } = useContext(Store);
+  const { userInfo } = state;
 
   const formItemLayout = {
     labelCol: {
@@ -35,23 +42,27 @@ function DogScreen() {
     },
   };
 
-  let handleSubmit = async (e) => {
+  async function handleSubmit() {
+    console.log(userInfo.token)
     try {
-      const { data } = await Axios.post('http://localhost:5005/api/v1/dog/add', {
+      const data = await Axios.post('http://localhost:5005/api/v1/dog/', {
         name,
-        category,
-        brand,
+        breed,
         description,
+        adoption,
         image,
-      });
+        images,
+      },
+        { headers: { Authorization: `Bearer ${userInfo.token}` }, }
+      );
       if (data.status === 200) {
-        alert("Submit Success");
+        alert("Submit Success.");
         form.resetFields()
       } else {
-        alert("Submit Fail. Please retry");
+        alert("Submit Fail. Please retry.");
       }
     } catch (err) {
-      alert("Submit Fail. Please retry");
+      alert("Submit Fail. Please retry later.");
       console.log(err);
     }
   };
@@ -60,27 +71,39 @@ function DogScreen() {
     form.resetFields();
   };
 
+  function adoptionSelect(value, evt){
+    setAdoption(value)
+  }
+
   return (
     <div>
       <Form onFinish={handleSubmit} {...formItemLayout} form={form} name="dog register" scrollToFirstError >
 
-        <Form.Item name="name" label="Nickname" value={name} onChange={(e) => setName(e.target.value)} tooltip="What do you want others to call you?" rules={[{ required: true, message: 'Please input the dog nickname!', whitespace: true }]}>
+        <Form.Item name="name" label="Nickname" value={name} onChange={(e) => setName(e.target.value)} tooltip="What do you want others to call you?"
+          rules={[{ required: true, message: 'Please input the dog nickname!', whitespace: true }]}>
           <Input />
         </Form.Item>
 
-        <Form.Item name="category" label="Category" onChange={(e) => setCategory(e.target.value)} rules={[{ required: true, message: 'Please input the dog category!', whitespace: true }]}>
+        <Form.Item name="adoption" label="Adoption" rules={[{ required: true, message: 'Please select status of adoption.' }]}>
+            <Select onChange={adoptionSelect}>
+              <Option value="true">Adopted</Option>
+              <Option value="false">Non-adopted</Option>
+            </Select>
+        </Form.Item>
+
+        <Form.Item name="breed" label="Breed" onChange={(e) => setBreed(e.target.value)}>
           <Input />
         </Form.Item>
 
-        <Form.Item name="brand" label="Brand" onChange={(e) => setBrand(e.target.value)} rules={[{ required: true, message: 'Please input the dog brand!', whitespace: true }]}>
-          <Input />
-        </Form.Item>
-
-        <Form.Item name="description" label="Description" onChange={(e) => setDescription(e.target.value)} rules={[{ required: true, message: 'Please input the dog description' }]} >
+        <Form.Item name="description" label="Description" onChange={(e) => setDescription(e.target.value)}>
           <Input.TextArea showCount maxLength={100} />
         </Form.Item>
 
-        <Form.Item name="image" label="Image" onChange={(e) => setImage(e.target.value)} rules={[{ required: true, message: 'Please input the dog image' }]} >
+        <Form.Item name="image" label="Image" onChange={(e) => setImage(e.target.value)}>
+          <Input.TextArea showCount maxLength={100} />
+        </Form.Item>
+
+        <Form.Item name="images" label="Images" onChange={(e) => setImages(e.target.value)}>
           <Input.TextArea showCount maxLength={100} />
         </Form.Item>
 
@@ -96,4 +119,4 @@ function DogScreen() {
   );
 };
 
-export default DogScreen;
+export default DogAddScreen;
