@@ -59,9 +59,9 @@ export default function App() {
           <Route exact path="/" element={<DogScreen />} />
           <Route path="/" element={<DogScreen />} />
           <Route path="/dog_add" element={<DogAddScreen />} />
-          <Route path="/dog/:id" element={<DogEditScreen />} />
-          <Route path="/user/:id" element={<UserScreen />} />
-          <Route path="/user_edit/:id" element={<UserEditScreen />} />
+          <Route path="/dog/:_id" element={<DogEditScreen />} />
+          {/* <Route path="/user/:id" element={<UserScreen />} /> */}
+          {/* <Route path="/user_edit/:id" element={<UserEditScreen />} /> */}
           <Route path="/SignIn" element={<SignInScreen />} />
           <Route path="/SignUp" element={<SignUpScreen />} />
           <Route path="*" element={<NotFound />} />
