@@ -118,7 +118,7 @@ function DogEditScreen() {
     }
   }
 
-  function adoptionSelect(value, evt){
+  function adoptionSelect(value, evt) {
     setAdoption(value)
   }
 
@@ -152,49 +152,52 @@ function DogEditScreen() {
     }
   };
 
-return loading ? (
-  <div>Loading...</div>
-) : error ? (
-  <div>error</div>
-) : (
-  <div>
-    <Form onFinish={handleSubmit} {...formItemLayout} form={form} name="dog register" scrollToFirstError>
+  return loading ? (
+    <div>Loading...</div>
+  ) : error ? (
+    <div>error</div>
+  ) : (
+    <div>
+      <Form onFinish={handleSubmit} {...formItemLayout} form={form} name="dog register" scrollToFirstError>
 
-      <Form.Item name="name" label="Nickname" onChange={(e) => setName(e.target.value)}
-        rules={[{ required: true, message: 'Please input the dog nickname!', whitespace: true }]}>
-        <Input defaultValue={name}/>
-      </Form.Item>
+        <Form.Item name="name" label="Nickname" onChange={(e) => setName(e.target.value)}
+          rules={[{ required: true, message: 'Please input the dog nickname!', whitespace: true }]}>
+          <Input defaultValue={name} />
+        </Form.Item>
 
-      <Form.Item name="adoption" label="Adoption" rules={[{ required: true, message: 'Please select status of adoption.' }]}>
-        <Select onChange={adoptionSelect} defaultValue={adoptionValue}>
-          <Option value="true">Adopted</Option>
-          <Option value="false">Non-adopted</Option>
-        </Select>
-      </Form.Item>
+        <Form.Item name="adoption" label="Adoption" rules={[{ required: true, message: 'Please select status of adoption.' }]}>
+          <Select onChange={adoptionSelect} defaultValue={adoptionValue}>
+            <Option value="true">Adopted</Option>
+            <Option value="false">Non-adopted</Option>
+          </Select>
+        </Form.Item>
 
-      <Form.Item name="breed" label="Breed" onChange={(e) => setBreed(e.target.value)}>
-        <Input defaultValue={dog.breed} />
-      </Form.Item>
+        <Form.Item name="breed" label="Breed" onChange={(e) => setBreed(e.target.value)}>
+          <Input defaultValue={dog.breed} />
+        </Form.Item>
 
-      <Form.Item name="description" label="Description" onChange={(e) => setDescription(e.target.value)}>
-        <Input.TextArea showCount maxLength={100} defaultValue={description} />
-      </Form.Item>
+        <Form.Item name="description" label="Description" onChange={(e) => setDescription(e.target.value)}>
+          <Input.TextArea showCount maxLength={100} defaultValue={description} />
+        </Form.Item>
 
-      <Form.Item name="image" label="Image" onChange={(e) => setImage(e.target.value)}>
-        <Input.TextArea showCount maxLength={100} defaultValue={image} />
-      </Form.Item>
+        <Form.Item name="image" label="Image" onChange={(e) => setImage(e.target.value)}>
+          <Input.TextArea showCount maxLength={100} defaultValue={image} />
+        </Form.Item>
 
-      <Form.Item name="images" label="Images" onChange={(e) => setImages(e.target.value)}>
-        <Input.TextArea showCount maxLength={100} defaultValue={images} />
-      </Form.Item>
+        <Form.Item name="images" label="Images" onChange={(e) => setImages(e.target.value)}>
+          <Input.TextArea showCount maxLength={100} defaultValue={images} />
+        </Form.Item>
 
-      <Form.Item {...tailFormItemLayout}>
-        <Button type="primary" htmlType="submit"> Confirm & Submit </Button>
-        &nbsp;&nbsp;
-        <Button htmlType="reset"><Link to="/dog"> Back </Link></Button>
-      </Form.Item>
-    </Form>
-  </div>
-);
+        <Form.Item {...tailFormItemLayout}>
+          {
+            userInfo ? userInfo.isAdmin ? (
+              <><Button type="primary" htmlType="submit"> Confirm & Submit </Button><>&nbsp;&nbsp;</></>
+            ) : (<></>) : (<></>)
+          }
+          <Button htmlType="reset"><Link to="/"> Back </Link></Button>
+        </Form.Item>
+      </Form>
+    </div>
+  );
 }
 export default DogEditScreen;
