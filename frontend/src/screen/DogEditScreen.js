@@ -98,11 +98,6 @@ function DogEditScreen() {
     }
   };
 
-  function cs(){
-    setName(`${dog.id}`)
-    setName(`${dog.name}`)
-  }
-
   return loading ? (
       <div>Loading...</div>
     ) : error ? (
@@ -142,7 +137,7 @@ function DogEditScreen() {
           </Form.Item>
 
           <Form.Item {...tailFormItemLayout}>
-            <Button type="primary" htmlType="submit" onClick={(e) => cs()}> Confirm & Submit </Button>
+            <Button type="primary" htmlType="submit"> Confirm & Submit </Button>
             &nbsp;&nbsp;
             <Button htmlType="reset"><Link to="/dog"> Back </Link></Button>
           </Form.Item>
