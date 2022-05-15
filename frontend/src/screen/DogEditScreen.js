@@ -1,8 +1,13 @@
-import React, { useState } from 'react';
-import { useEffect, useReducer } from 'react';
-import { Form, Input, Button } from 'antd';
+import React, { useState, useContext, useEffect, useReducer } from 'react';
+import { Form, Input, Button, Select } from 'antd';
 import { useParams, Link } from 'react-router-dom';
 import Axios from 'axios';
+import { Store } from '../Store';
+import { attachTypeApi } from 'antd/lib/message';
+// import Container from 'react-bootstrap/Container';
+// import ListGroup from 'react-bootstrap/ListGroup';
+// import Form from 'react-bootstrap/Form';
+// import Button from 'react-bootstrap/Button';
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -16,15 +21,22 @@ const reducer = (state, action) => {
       return state;
   }
 };
+
+const { Option } = Select;
+
 function DogEditScreen() {
-  const [form] = Form.useForm();
   const params = useParams();
-  const { id } = params;
+  const { _id } = params;
+  const { state } = useContext(Store);
+  const { userInfo } = state;
+
+  const [form] = Form.useForm();
   const [name, setName] = useState("");
-  const [category, setCategory] = useState("");
-  const [brand, setBrand] = useState("");
+  const [breed, setBreed] = useState("");
   const [description, setDescription] = useState("");
+  const [adoption, setAdoption] = useState("");
   const [image, setImage] = useState("");
+  const [images, setImages] = useState("");
 
   const formItemLayout = {
     labelCol: {
@@ -51,14 +63,20 @@ function DogEditScreen() {
   };
 
   useEffect(() => {
-    console.log("useEffect")
+    console.log("11dog edit useEffect : " + _id)
     const fetchData = async () => {
       dispatch({ type: 'FETCH_REQUEST' });
       try {
-        const result = await Axios.get(`http://localhost:5005/api/v1/dog/${id}`);
-        if (result.data.status === 200) {
-          console.log(200)
-          dispatch({ type: 'FETCH_SUCCESS', payload: result.data.data[0] });
+        const result = await Axios.get(`http://localhost:5005/api/v1/dog/${_id}`);
+        console.log(result.data)
+        if (result.status === 200) {
+          setName(result.data.name)
+          setBreed(result.data.breed)
+          setDescription(result.data.description)
+          setAdoption(result.data.adoption)
+          setImage(result.data.image)
+          setImages(result.data.images)
+          dispatch({ type: 'FETCH_SUCCESS', payload: result.data });
         } else {
           dispatch({ type: 'FETCH_SUCCESS', payload: null });
         }
@@ -68,7 +86,7 @@ function DogEditScreen() {
       }
     };
     fetchData();
-  }, [id]);
+  }, []);
 
   const [{ loading, error, dog }, dispatch] = useReducer(reducer, {
     dog: [],
@@ -76,73 +94,107 @@ function DogEditScreen() {
     error: '',
   });
 
-  let handleSubmit = async (e) => {
+  async function handleSubmit() {
+    console.log(userInfo.token)
     try {
-      const { data } = await Axios.post('http://localhost:5005/api/v1/dog/res/', {
-        id,
+      const data = await Axios.post(`http://localhost:5005/api/v1/dog/${_id}`, {
         name,
-        category,
-        brand,
+        breed,
         description,
+        adoption,
         image,
-      });
+        images,
+      },
+        { headers: { Authorization: `Bearer ${userInfo.token}` }, }
+      );
       if (data.status === 200) {
-        alert("Submit Success");
-        form.resetFields()
+        alert("Submit Success.");
       } else {
-        alert("Submit Fail. Please retry");
+        alert("Submit Fail. Please retry.");
       }
     } catch (err) {
-      alert("Submit Fail. Please retry");
+      alert("Submit Fail. Please retry later.");
       console.log(err);
+    }
+  }
+
+  function adoptionSelect(value, evt){
+    setAdoption(value)
+  }
+
+  function adoptionValue() {
+    return "" + adoption
+  }
+
+  const uploadFileHandler = async (e, forImages) => {
+    const file = e.target.files[0];
+    const bodyFormData = new FormData();
+    bodyFormData.append('file', file);
+    try {
+      dispatch({ type: 'UPLOAD_REQUEST' });
+      const { data } = await Axios.post('/api/upload', bodyFormData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          authorization: `Bearer ${userInfo.token}`,
+        },
+      });
+      dispatch({ type: 'UPLOAD_SUCCESS' });
+
+      if (forImages) {
+        setImages([...images, data.secure_url]);
+      } else {
+        setImage(data.secure_url);
+      }
+      alert('Image uploaded successfully. click Update to apply it');
+    } catch (err) {
+      alert(err);
+      dispatch({ type: 'UPLOAD_FAIL', payload: "Error" });
     }
   };
 
-  return loading ? (
-      <div>Loading...</div>
-    ) : error ? (
-      <div>error</div>
-    ) : (
-      <div>
-        <Form onFinish={handleSubmit} {...formItemLayout} form={form} name="dog register" scrollToFirstError>
+return loading ? (
+  <div>Loading...</div>
+) : error ? (
+  <div>error</div>
+) : (
+  <div>
+    <Form onFinish={handleSubmit} {...formItemLayout} form={form} name="dog register" scrollToFirstError>
 
-          <Form.Item name="id" label="Id" tooltip="What do you want others to call you?" style={{ display: "none" }}
-            rules={[{ message: 'Please input the dog nickname!'}]}>
-            <Input style={{ display: "none" }} defaultValue={dog.id}/>
-          </Form.Item>
+      <Form.Item name="name" label="Nickname" onChange={(e) => setName(e.target.value)}
+        rules={[{ required: true, message: 'Please input the dog nickname!', whitespace: true }]}>
+        <Input defaultValue={name}/>
+      </Form.Item>
 
-          <Form.Item name="name" label="Nickname" onChange={(e) => setName(e.target.value)} tooltip="What do you want others to call you?"
-            rules={[{ message: 'Please input the dog nickname!'}]}>
-            <Input defaultValue={dog.name} />
-          </Form.Item>
+      <Form.Item name="adoption" label="Adoption" rules={[{ required: true, message: 'Please select status of adoption.' }]}>
+        <Select onChange={adoptionSelect} defaultValue={adoptionValue}>
+          <Option value="true">Adopted</Option>
+          <Option value="false">Non-adopted</Option>
+        </Select>
+      </Form.Item>
 
-          <Form.Item name="category" label="Category" onChange={(e) => setCategory(e.target.value)}
-            rules={[{ message: 'Please input the dog category!', whitespace: true }]}>
-            <Input defaultValue={dog.category} />
-          </Form.Item>
+      <Form.Item name="breed" label="Breed" onChange={(e) => setBreed(e.target.value)}>
+        <Input defaultValue={dog.breed} />
+      </Form.Item>
 
-          <Form.Item name="brand" label="Brand" onChange={(e) => setBrand(e.target.value)}
-            rules={[{ message: 'Please input the dog brand!', whitespace: true }]}>
-            <Input defaultValue={dog.brand} />
-          </Form.Item>
+      <Form.Item name="description" label="Description" onChange={(e) => setDescription(e.target.value)}>
+        <Input.TextArea showCount maxLength={100} defaultValue={description} />
+      </Form.Item>
 
-          <Form.Item name="description" label="Description" onChange={(e) => setDescription(e.target.value)}
-            rules={[{ message: 'Please input the dog description' }]} >
-            <Input.TextArea showCount maxLength={100} defaultValue={dog.description} />
-          </Form.Item>
+      <Form.Item name="image" label="Image" onChange={(e) => setImage(e.target.value)}>
+        <Input.TextArea showCount maxLength={100} defaultValue={image} />
+      </Form.Item>
 
-          <Form.Item name="image" label="Image" onChange={(e) => setImage(e.target.value)}
-            rules={[{ message: 'Please input the dog image' }]} >
-            <Input.TextArea showCount maxLength={100} defaultValue={dog.image} />
-          </Form.Item>
+      <Form.Item name="images" label="Images" onChange={(e) => setImages(e.target.value)}>
+        <Input.TextArea showCount maxLength={100} defaultValue={images} />
+      </Form.Item>
 
-          <Form.Item {...tailFormItemLayout}>
-            <Button type="primary" htmlType="submit"> Confirm & Submit </Button>
-            &nbsp;&nbsp;
-            <Button htmlType="reset"><Link to="/dog"> Back </Link></Button>
-          </Form.Item>
-        </Form>
-      </div>
-    );
+      <Form.Item {...tailFormItemLayout}>
+        <Button type="primary" htmlType="submit"> Confirm & Submit </Button>
+        &nbsp;&nbsp;
+        <Button htmlType="reset"><Link to="/dog"> Back </Link></Button>
+      </Form.Item>
+    </Form>
+  </div>
+);
 }
 export default DogEditScreen;
