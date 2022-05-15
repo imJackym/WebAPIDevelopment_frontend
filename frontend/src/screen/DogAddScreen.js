@@ -87,7 +87,7 @@ function DogAddScreen() {
         <Form.Item name="adoption" label="Adoption" rules={[{ required: true, message: 'Please select status of adoption.' }]}>
             <Select onChange={adoptionSelect}>
               <Option value="true">Adopted</Option>
-              <Option value="false">Non-adopted</Option>
+              <Option value="false">Non-Adopted</Option>
             </Select>
         </Form.Item>
 
