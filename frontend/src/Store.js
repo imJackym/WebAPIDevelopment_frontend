@@ -5,8 +5,8 @@ export const Store = createContext();
 const initialState = {
   fullBox: false,
   userInfo: localStorage.getItem('userInfo')
-    ? JSON.parse(localStorage.getItem('userInfo'))
-    : null,
+    ? null
+    : JSON.parse(localStorage.getItem('userInfo')),
 };
 
 function reducer(state, action) {
