@@ -1,30 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Store } from '../Store';
 import { Form, Input, Button } from 'antd';
 import Axios from 'axios';
 import bcryptjs from 'bcryptjs';
 
 function SignInScreen() {
+  const navigate = useNavigate();
   const [form] = Form.useForm();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const { state, dispatch: ctxDispatch } = useContext(Store);
+  const { userInfo } = state;
+  const { search } = useLocation();
+  const redirectInUrl = new URLSearchParams(search).get('redirect');
+  const redirect = redirectInUrl ? redirectInUrl : '/';
 
   async function handleSubmit() {
-    console.log(password)
     try {
-      const { data } = await Axios.post('http://localhost:5005/api/v1/dog/res/', {
+      const { data } = await Axios.post('http://localhost:5005/api/v1/user/login', {
         username,
         password,
       });
       if (data.status === 200) {
         alert("Submit Success");
-        form.resetFields()
+        ctxDispatch({ type: 'USER_SIGNIN', payload: data });
+        localStorage.setItem('userInfo', JSON.stringify(data));
+        navigate(redirect || '/');
       } else {
-        alert("Submit Fail. Please try again later");
+        alert(data.status);
       }
     } catch (error) {
       alert("Submit Fail. Please retry");
     }
   }
+
+  useEffect(() => {
+    if (userInfo) {
+      navigate(redirect);
+    }
+  }, [navigate, redirect, userInfo]);
 
   return (
     <Form name="basic" labelCol={{ span: 24 }} wrapperCol={{ span: 16 }} initialValues={{ remember: true }} onFinish={handleSubmit} autoComplete="off">
