@@ -1,10 +1,12 @@
-import { Form, Input, Card, Button } from 'antd';
-import { Link } from 'react-router-dom';
+import { Form, Input, Card, Button, Select } from 'antd';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import React, { useState, useContext, useEffect, useReducer } from 'react';
 import { Store } from '../Store';
 
 const { Meta } = Card;
+const { Search } = Input;
+const { Option } = Select;
 
 const gridStyle = {
   width: '25%',
@@ -19,14 +21,15 @@ const cardStyle = {
 const reducer = (state, action) => {
   switch (action.type) {
     case 'FETCH_REQUEST':
-      // console.log("FETCH_REQUEST")
       return { ...state, loading: true };
     case 'FETCH_SUCCESS':
-      // console.log("FETCH_SUCCESS")
-      return { ...state, dogs: action.payload, loading: false };
+      return { ...state, dogs: action.payload, allBreeds: action.sss, loading: false };
     case 'FETCH_FAIL':
-      // console.log("FETCH_FAIL")
       return { ...state, loading: false, error: action.payload };
+    case 'FETCH_SEARCH':
+      return { ...state, dogs: action.payload, loading: false };
+    case 'FETCH_SEARCH_BREED':
+      return { ...state, dogs: action.payload, loading: false };
     default:
       return state;
   }
@@ -35,6 +38,7 @@ const reducer = (state, action) => {
 export default function DogScreen() {
 
   const { state } = useContext(Store);
+  const navigate = useNavigate();
   const { userInfo } = state;
 
   const [{ loading, error, dogs }, dispatch] = useReducer(reducer, {
@@ -57,6 +61,23 @@ export default function DogScreen() {
     fetchData();
   }, []);
 
+  const onSearch = value => {
+    const fetchData = async () => {
+      try {
+        if (value !== "") {
+          const result = await axios.get(`http://localhost:5005/api/v1/dog/search/${value}`);
+          dispatch({ type: 'FETCH_SEARCH', payload: result.data });
+        } else {
+          const result = await axios.get('http://localhost:5005/api/v1/dog');
+          dispatch({ type: 'FETCH_SUCCESS', payload: result.data });
+        }
+      } catch (error) {
+        console.log(error)
+        dispatch({ type: 'FETCH_FAIL', payload: "ERROR" })
+      }
+    };
+    fetchData();
+  }
 
   return loading ? (
     <div>Loading</div>
@@ -65,14 +86,7 @@ export default function DogScreen() {
   ) : (
     <div>
       <div>
-        <Form.Item name="id" label="Id" tooltip="What do you want others to call you?" style={{ display: "none" }}
-          rules={[{ message: 'Please input the dog nickname!' }]}>
-          <Input style={{ display: "none" }} />
-        </Form.Item>
-        &nbsp;
-        <Button type="primary">
-          <Link to="/dog_add">Search</Link>
-        </Button>
+        <Search placeholder="Search Name" onSearch={onSearch} style={{ width: 200 }} />
         &nbsp;
         {
           userInfo ? userInfo.isAdmin ? (
@@ -84,7 +98,7 @@ export default function DogScreen() {
       </div>
       <br />
       {
-        dogs?.map((dog) => (
+        dogs.dogs?.map((dog) => (
           <div className="dog" key={`${dog.id}`}>
             <Link to={`/dog/${dog._id}`}>
               <Card.Grid style={gridStyle}>
