@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect, useReducer } from 'react';
 import { Form, Input, Button, Select } from 'antd';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import Axios from 'axios';
 import { Store } from '../Store';
 import { attachTypeApi } from 'antd/lib/message';
@@ -26,6 +26,7 @@ const { Option } = Select;
 
 function DogEditScreen() {
   const params = useParams();
+  const navigate = useNavigate();
   const { _id } = params;
   const { state } = useContext(Store);
   const { userInfo } = state;
@@ -63,12 +64,10 @@ function DogEditScreen() {
   };
 
   useEffect(() => {
-    console.log("11dog edit useEffect : " + _id)
     const fetchData = async () => {
       dispatch({ type: 'FETCH_REQUEST' });
       try {
         const result = await Axios.get(`http://localhost:5005/api/v1/dog/${_id}`);
-        console.log(result.data)
         if (result.status === 200) {
           setName(result.data.name)
           setBreed(result.data.breed)
@@ -80,7 +79,6 @@ function DogEditScreen() {
         } else {
           dispatch({ type: 'FETCH_SUCCESS', payload: null });
         }
-        console.log("-----------------------------")
       } catch (err) {
         dispatch({ type: 'FETCH_SUCCESS', payload: null });
       }
@@ -95,7 +93,6 @@ function DogEditScreen() {
   });
 
   async function handleSubmit() {
-    console.log(userInfo.token)
     try {
       const data = await Axios.post(`http://localhost:5005/api/v1/dog/${_id}`, {
         name,
@@ -118,11 +115,11 @@ function DogEditScreen() {
     }
   }
 
-  function adoptionSelect(value, evt) {
+  const adoptionSelect = (value, evt) => {
     setAdoption(value)
   }
 
-  function adoptionValue() {
+  const adoptionValue = () => {
     return "" + adoption
   }
 
@@ -152,6 +149,20 @@ function DogEditScreen() {
     }
   };
 
+  const delClick = async () => {
+    try {
+      const data = await Axios.post(`http://localhost:5005/api/v1/dog/delete/${_id}`,
+        {},
+        { headers: { Authorization: `Bearer ${userInfo.token}` }, }
+      );
+      alert("Delete Success");
+      navigate("/");
+    } catch (err) {
+      alert("Delete Fail. Please content Admin.");
+      console.log(err);
+    }
+  }
+
   return loading ? (
     <div>Loading...</div>
   ) : error ? (
@@ -162,36 +173,48 @@ function DogEditScreen() {
 
         <Form.Item name="name" label="Nickname" onChange={(e) => setName(e.target.value)}
           rules={[{ required: true, message: 'Please input the dog nickname!', whitespace: true }]}>
-          <Input defaultValue={name} />
+          {userInfo ? (<Input defaultValue={name} />) : (<Input disabled defaultValue={name} />)}
         </Form.Item>
 
         <Form.Item name="adoption" label="Adoption" rules={[{ required: true, message: 'Please select status of adoption.' }]}>
-          <Select onChange={adoptionSelect} defaultValue={adoptionValue}>
-            <Option value="true">Adopted</Option>
-            <Option value="false">Non-adopted</Option>
-          </Select>
+          {userInfo ? (
+            <Select defaultValue={adoptionValue} onChange={adoptionSelect}>
+              <Option value="true">Adopted</Option>
+              <Option value="false">Non-adopted</Option>
+            </Select>
+          ) : (
+            <Select defaultValue={adoptionValue} disabled>
+              <Option value="true">Adopted</Option>
+              <Option value="false">Non-adopted</Option>
+            </Select>
+          )}
         </Form.Item>
 
         <Form.Item name="breed" label="Breed" onChange={(e) => setBreed(e.target.value)}>
-          <Input defaultValue={dog.breed} />
+          {userInfo ? (<Input defaultValue={breed} />) : (<Input disabled defaultValue={breed} />)}
         </Form.Item>
 
         <Form.Item name="description" label="Description" onChange={(e) => setDescription(e.target.value)}>
-          <Input.TextArea showCount maxLength={100} defaultValue={description} />
+          {userInfo ? (<Input.TextArea showCount maxLength={100} defaultValue={description} />) : (<Input.TextArea disabled showCount maxLength={100} defaultValue={description} />)}
         </Form.Item>
 
         <Form.Item name="image" label="Image" onChange={(e) => setImage(e.target.value)}>
-          <Input.TextArea showCount maxLength={100} defaultValue={image} />
+          {userInfo ? (<Input.TextArea showCount maxLength={100} defaultValue={image} />) : (<Input.TextArea disabled showCount maxLength={100} defaultValue={image} />)}
         </Form.Item>
 
         <Form.Item name="images" label="Images" onChange={(e) => setImages(e.target.value)}>
-          <Input.TextArea showCount maxLength={100} defaultValue={images} />
+          {userInfo ? (<Input.TextArea showCount maxLength={100} defaultValue={images} />) : (<Input.TextArea disabled showCount maxLength={100} defaultValue={images} />)}
         </Form.Item>
 
         <Form.Item {...tailFormItemLayout}>
           {
             userInfo ? userInfo.isAdmin ? (
-              <><Button type="primary" htmlType="submit"> Confirm & Submit </Button><>&nbsp;&nbsp;</></>
+              <>
+                <Button type="primary" htmlType="submit"> Confirm & Submit </Button>
+                <>&nbsp;&nbsp;</>
+                <Button type="danger" onClick={delClick}> Delete </Button>
+                <>&nbsp;&nbsp;</>
+              </>
             ) : (<></>) : (<></>)
           }
           <Button htmlType="reset"><Link to="/"> Back </Link></Button>
@@ -200,4 +223,5 @@ function DogEditScreen() {
     </div>
   );
 }
+
 export default DogEditScreen;
