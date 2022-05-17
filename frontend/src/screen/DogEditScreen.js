@@ -1,13 +1,10 @@
 import React, { useState, useContext, useEffect, useReducer } from 'react';
-import { Form, Input, Button, Select } from 'antd';
+import { Form, Input, Button, Select, Upload, message } from 'antd';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import Axios from 'axios';
+import Axios, { post } from 'axios';
 import { Store } from '../Store';
-import { attachTypeApi } from 'antd/lib/message';
-// import Container from 'react-bootstrap/Container';
-// import ListGroup from 'react-bootstrap/ListGroup';
-// import Form from 'react-bootstrap/Form';
-// import Button from 'react-bootstrap/Button';
+// import { attachTypeApi } from 'antd/lib/message';
+// import { UploadOutlined } from '@ant-design/icons';
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -15,8 +12,10 @@ const reducer = (state, action) => {
       return { ...state, loading: true };
     case 'FETCH_SUCCESS':
       return { ...state, dog: action.payload, loading: false };
-    // case 'FETCH_FAIL':
-    //   return { ...state, loading: false, error: action.payload };
+    case 'FETCH_FAIL':
+      return { ...state, loading: false, error: action.payload };
+    // case 'UPLOAD_REQUEST':
+    //   return { ...state, loadingUpload: true, errorUpload: '' };
     default:
       return state;
   }
@@ -123,31 +122,49 @@ function DogEditScreen() {
     return "" + adoption
   }
 
-  const uploadFileHandler = async (e, forImages) => {
-    const file = e.target.files[0];
-    const bodyFormData = new FormData();
-    bodyFormData.append('file', file);
-    try {
-      dispatch({ type: 'UPLOAD_REQUEST' });
-      const { data } = await Axios.post('/api/upload', bodyFormData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          authorization: `Bearer ${userInfo.token}`,
-        },
-      });
-      dispatch({ type: 'UPLOAD_SUCCESS' });
+  // const uploadFileHandler = async (e, forImages) => {
+  //   const file = e.target.files[0];
+  //   const bodyFormData = new FormData();
+  //   bodyFormData.append('file', file);
+  //   try {
+  //     dispatch({ type: 'UPLOAD_REQUEST' });
+  //     const { data } = await Axios.post('http://localhost:5005/api/v1/dog/upload', bodyFormData, {
+  //       headers: {
+  //         'Content-Type': 'multipart/form-data',
+  //         authorization: `Bearer ${userInfo.token}`,
+  //       },
+  //     });
+  //     dispatch({ type: 'UPLOAD_SUCCESS' });
 
-      if (forImages) {
-        setImages([...images, data.secure_url]);
-      } else {
-        setImage(data.secure_url);
-      }
-      alert('Image uploaded successfully. click Update to apply it');
-    } catch (err) {
-      alert(err);
-      dispatch({ type: 'UPLOAD_FAIL', payload: "Error" });
-    }
-  };
+  //     if (forImages) {
+  //       setImages([...images, data.secure_url]);
+  //     } else {
+  //       setImage(data.secure_url);
+  //     }
+  //     alert('Image uploaded successfully. click Update to apply it');
+  //   } catch (err) {
+  //     alert(err);
+  //     dispatch({ type: 'UPLOAD_FAIL', payload: "Error" });
+  //   }
+  // };
+
+  // const props = {
+  //   name: 'file',
+  //   action: 'https://www.mocky.io/v2/5cc8019d300000980a055e76',
+  //   headers: {
+  //     authorization: 'authorization-text',
+  //   },
+  //   onChange(info) {
+  //     if (info.file.status !== 'uploading') {
+  //       console.log(info.file, info.fileList);
+  //     }
+  //     if (info.file.status === 'done') {
+  //       message.success(`${info.file.name} file uploaded successfully`);
+  //     } else if (info.file.status === 'error') {
+  //       message.error(`${info.file.name} file upload failed.`);
+  //     }
+  //   },
+  // };
 
   const delClick = async () => {
     try {
@@ -159,6 +176,45 @@ function DogEditScreen() {
       navigate("/");
     } catch (err) {
       alert("Delete Fail. Please content Admin.");
+      console.log(err);
+    }
+  }
+
+  // const fileInput = (e) => {
+  //   let files = e.target.files;
+  //   console.warn("data file", files)
+  //   console.log(files)
+  //   let reader = new FileReader();
+  //   reader.readAsDataURL(files[0])
+  //   reader.onload = (e) => {
+  //     console.warn("img data ", e.target.result)
+  //     const url = "http://localhost:5005/api/v1/dog/upload"
+  //     const formData = { file: e.target.result }
+  //     return post(url, formData).then(response => console.warn("result", response))
+  //   }
+  // }
+
+  const [fav_button, setFav_button] = useState("Add Favourite List");
+
+  const addFav = async (value) => {
+    const username = `${userInfo.name}`
+    try {
+      if (fav_button === "Add Favourite List") {
+        const data = await Axios.post(`http://localhost:5005/api/v1/user/fav/${_id}`,
+          { name: username }, { headers: { Authorization: `Bearer ${userInfo.token}` }, }
+        );
+        console.log(data)
+        alert("Add to your favourite list")
+        setFav_button("Remove Favourite List")
+      } else if (fav_button === "Remove Favourite List") {
+        const data = await Axios.post(`http://localhost:5005/api/v1/user/refav/${_id}`,
+          { name: username }, { headers: { Authorization: `Bearer ${userInfo.token}` }, }
+        );
+        alert("Remove to your favourite list")
+        setFav_button("Add Favourite List")
+      }
+    } catch (err) {
+      alert("Please try again later or content Admin.");
       console.log(err);
     }
   }
@@ -203,7 +259,14 @@ function DogEditScreen() {
         </Form.Item>
 
         <Form.Item name="images" label="Images" onChange={(e) => setImages(e.target.value)}>
-          {userInfo ? (<Input.TextArea showCount maxLength={100} defaultValue={images} />) : (<Input.TextArea disabled showCount maxLength={100} defaultValue={images} />)}
+          {/* <Upload onChange={(e) => uploadFileHandler(e, true)}>
+            <Button icon={<UploadOutlined />}>Click to Upload</Button>
+          </Upload> */}
+
+          {/* <div>
+            <input type="file" name="file" onChange={(e) => fileInput(e)} />
+          </div> */}
+
         </Form.Item>
 
         <Form.Item {...tailFormItemLayout}>
@@ -213,6 +276,8 @@ function DogEditScreen() {
                 <Button type="primary" htmlType="submit"> Confirm & Submit </Button>
                 <>&nbsp;&nbsp;</>
                 <Button type="danger" onClick={delClick}> Delete </Button>
+                <>&nbsp;&nbsp;</>
+                <Button type="primary" style={{ background: "#28a745" }} onClick={addFav}> {fav_button} </Button>
                 <>&nbsp;&nbsp;</>
               </>
             ) : (<></>) : (<></>)
