@@ -12,7 +12,7 @@ function DogAddScreen() {
   const [description, setDescription] = useState("");
   const [adoption, setAdoption] = useState("");
   const [image, setImage] = useState("");
-  const [images, setImages] = useState("");
+  const [file, setFile] = useState("https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png");
   const [form] = Form.useForm();
 
   const { state } = useContext(Store);
@@ -45,15 +45,17 @@ function DogAddScreen() {
   async function handleSubmit() {
     console.log(userInfo.token)
     try {
-      const data = await Axios.post('http://localhost:5005/api/v1/dog/', {
-        name,
-        breed,
-        description,
-        adoption,
-        image,
-        images,
-      },
-        { headers: { Authorization: `Bearer ${userInfo.token}` }, }
+      const data = await Axios.post('http://localhost:5005/api/v1/dog/',
+        {
+          name,
+          breed,
+          description,
+          adoption,
+          image,
+        },
+        {
+          headers: { Authorization: `Bearer ${userInfo.token}` },
+        }
       );
       if (data.status === 200) {
         alert("Submit Success.");
@@ -71,8 +73,23 @@ function DogAddScreen() {
     form.resetFields();
   };
 
-  function adoptionSelect(value, evt){
+  function adoptionSelect(value, evt) {
     setAdoption(value)
+  }
+
+  const handleUploadFile = async (e) => {
+    try {
+      const file = e.target.files[0];
+      const bodyFormData = new FormData();
+      bodyFormData.append('pic', file);
+      const result = await Axios.post(`http://localhost:5005/api/v1/dog/upload/`,
+        bodyFormData, { headers: { Authorization: `Bearer ${userInfo.token}` }, }
+      );
+      setImage(result.data.fullPath)
+      setFile(URL.createObjectURL(e.target.files[0]))
+    } catch (err) {
+      console.log("handleUploadFile err")
+    }
   }
 
   return (
@@ -85,10 +102,10 @@ function DogAddScreen() {
         </Form.Item>
 
         <Form.Item name="adoption" label="Adoption" rules={[{ required: true, message: 'Please select status of adoption.' }]}>
-            <Select onChange={adoptionSelect}>
-              <Option value="true">Adopted</Option>
-              <Option value="false">Non-Adopted</Option>
-            </Select>
+          <Select onChange={adoptionSelect}>
+            <Option value="true">Adopted</Option>
+            <Option value="false">Non-Adopted</Option>
+          </Select>
         </Form.Item>
 
         <Form.Item name="breed" label="Breed" onChange={(e) => setBreed(e.target.value)}>
@@ -100,12 +117,10 @@ function DogAddScreen() {
         </Form.Item>
 
         <Form.Item name="image" label="Image" onChange={(e) => setImage(e.target.value)}>
-          <Input.TextArea showCount maxLength={100} />
+          <input type="file" name='pic' id='pic' onChange={handleUploadFile} />
         </Form.Item>
 
-        <Form.Item name="images" label="Images" onChange={(e) => setImages(e.target.value)}>
-          <Input.TextArea showCount maxLength={100} />
-        </Form.Item>
+        <img src={file} />
 
         <Form.Item {...tailFormItemLayout}>
           <Button type="primary" htmlType="submit"> Register </Button>

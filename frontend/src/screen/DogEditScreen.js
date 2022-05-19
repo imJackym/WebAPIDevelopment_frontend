@@ -1,10 +1,8 @@
 import React, { useState, useContext, useEffect, useReducer } from 'react';
-import { Form, Input, Button, Select, Upload, message } from 'antd';
+import { Form, Input, Button, Select } from 'antd';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import Axios, { post } from 'axios';
+import Axios from 'axios';
 import { Store } from '../Store';
-// import { attachTypeApi } from 'antd/lib/message';
-// import { UploadOutlined } from '@ant-design/icons';
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -14,8 +12,6 @@ const reducer = (state, action) => {
       return { ...state, dog: action.payload, loading: false };
     case 'FETCH_FAIL':
       return { ...state, loading: false, error: action.payload };
-    // case 'UPLOAD_REQUEST':
-    //   return { ...state, loadingUpload: true, errorUpload: '' };
     default:
       return state;
   }
@@ -36,7 +32,7 @@ function DogEditScreen() {
   const [description, setDescription] = useState("");
   const [adoption, setAdoption] = useState("");
   const [image, setImage] = useState("");
-  const [images, setImages] = useState("");
+  const [fav_button, setFav_button] = useState("Add Favourite List");
 
   const formItemLayout = {
     labelCol: {
@@ -73,7 +69,18 @@ function DogEditScreen() {
           setDescription(result.data.description)
           setAdoption(result.data.adoption)
           setImage(result.data.image)
-          setImages(result.data.images)
+          if (userInfo != null) {
+            let name = result.data.name
+            const fav = await Axios.post(`http://localhost:5005/api/v1/user/favlist/`,
+              { name },
+              { headers: { Authorization: `Bearer ${userInfo.token}` }, }
+            );
+            for (let i = 0; i < fav.data.favlist.length; i++) {
+              if (_id.indexOf(fav.data.favlist[i]) >= 0) {
+                setFav_button("Remove Favourite List")
+              }
+            }
+          }
           dispatch({ type: 'FETCH_SUCCESS', payload: result.data });
         } else {
           dispatch({ type: 'FETCH_SUCCESS', payload: null });
@@ -99,7 +106,6 @@ function DogEditScreen() {
         description,
         adoption,
         image,
-        images,
       },
         { headers: { Authorization: `Bearer ${userInfo.token}` }, }
       );
@@ -122,54 +128,9 @@ function DogEditScreen() {
     return "" + adoption
   }
 
-  // const uploadFileHandler = async (e, forImages) => {
-  //   const file = e.target.files[0];
-  //   const bodyFormData = new FormData();
-  //   bodyFormData.append('file', file);
-  //   try {
-  //     dispatch({ type: 'UPLOAD_REQUEST' });
-  //     const { data } = await Axios.post('http://localhost:5005/api/v1/dog/upload', bodyFormData, {
-  //       headers: {
-  //         'Content-Type': 'multipart/form-data',
-  //         authorization: `Bearer ${userInfo.token}`,
-  //       },
-  //     });
-  //     dispatch({ type: 'UPLOAD_SUCCESS' });
-
-  //     if (forImages) {
-  //       setImages([...images, data.secure_url]);
-  //     } else {
-  //       setImage(data.secure_url);
-  //     }
-  //     alert('Image uploaded successfully. click Update to apply it');
-  //   } catch (err) {
-  //     alert(err);
-  //     dispatch({ type: 'UPLOAD_FAIL', payload: "Error" });
-  //   }
-  // };
-
-  // const props = {
-  //   name: 'file',
-  //   action: 'https://www.mocky.io/v2/5cc8019d300000980a055e76',
-  //   headers: {
-  //     authorization: 'authorization-text',
-  //   },
-  //   onChange(info) {
-  //     if (info.file.status !== 'uploading') {
-  //       console.log(info.file, info.fileList);
-  //     }
-  //     if (info.file.status === 'done') {
-  //       message.success(`${info.file.name} file uploaded successfully`);
-  //     } else if (info.file.status === 'error') {
-  //       message.error(`${info.file.name} file upload failed.`);
-  //     }
-  //   },
-  // };
-
   const delClick = async () => {
     try {
-      const data = await Axios.post(`http://localhost:5005/api/v1/dog/delete/${_id}`,
-        {},
+      const data = await Axios.post(`http://localhost:5005/api/v1/dog/delete/${_id}`, {},
         { headers: { Authorization: `Bearer ${userInfo.token}` }, }
       );
       alert("Delete Success");
@@ -180,35 +141,38 @@ function DogEditScreen() {
     }
   }
 
-  // const fileInput = (e) => {
-  //   let files = e.target.files;
-  //   console.warn("data file", files)
-  //   console.log(files)
-  //   let reader = new FileReader();
-  //   reader.readAsDataURL(files[0])
-  //   reader.onload = (e) => {
-  //     console.warn("img data ", e.target.result)
-  //     const url = "http://localhost:5005/api/v1/dog/upload"
-  //     const formData = { file: e.target.result }
-  //     return post(url, formData).then(response => console.warn("result", response))
-  //   }
-  // }
-
-  const [fav_button, setFav_button] = useState("Add Favourite List");
+  const handleUploadFile = async (e) => {
+    try {
+      const file = e.target.files[0];
+      const bodyFormData = new FormData();
+      bodyFormData.append('pic', file);
+      const result = await Axios.post(`http://localhost:5005/api/v1/dog/upload/`,
+        bodyFormData, { headers: { Authorization: `Bearer ${userInfo.token}` }, }
+      );
+      setImage(result.data.fullPath)
+    } catch (err) {
+      console.log("handleUploadFile err")
+    }
+  }
 
   const addFav = async (value) => {
     const username = `${userInfo.name}`
+    console.log(`${userInfo.token}`)
     try {
       if (fav_button === "Add Favourite List") {
         const data = await Axios.post(`http://localhost:5005/api/v1/user/fav/${_id}`,
-          { name: username }, { headers: { Authorization: `Bearer ${userInfo.token}` }, }
+          { name: username },
+          { headers: { Authorization: `Bearer ${userInfo.token}` }, }
         );
         console.log(data)
         alert("Add to your favourite list")
         setFav_button("Remove Favourite List")
       } else if (fav_button === "Remove Favourite List") {
         const data = await Axios.post(`http://localhost:5005/api/v1/user/refav/${_id}`,
-          { name: username }, { headers: { Authorization: `Bearer ${userInfo.token}` }, }
+          { name: username },
+          {
+            headers: { Authorization: `Bearer ${userInfo.token}` },
+          }
         );
         alert("Remove to your favourite list")
         setFav_button("Add Favourite List")
@@ -255,18 +219,12 @@ function DogEditScreen() {
         </Form.Item>
 
         <Form.Item name="image" label="Image" onChange={(e) => setImage(e.target.value)}>
-          {userInfo ? (<Input.TextArea showCount maxLength={100} defaultValue={image} />) : (<Input.TextArea disabled showCount maxLength={100} defaultValue={image} />)}
-        </Form.Item>
-
-        <Form.Item name="images" label="Images" onChange={(e) => setImages(e.target.value)}>
-          {/* <Upload onChange={(e) => uploadFileHandler(e, true)}>
-            <Button icon={<UploadOutlined />}>Click to Upload</Button>
-          </Upload> */}
-
-          {/* <div>
-            <input type="file" name="file" onChange={(e) => fileInput(e)} />
-          </div> */}
-
+          {
+            userInfo ? userInfo.isAdmin ? (
+              <input type="file" name='pic' id='pic' onChange={handleUploadFile}/>) : 
+              (<input disabled type="file" name='pic' id='pic'/>) : 
+              (<input disabled type="file" name='pic' id='pic'/>)
+          }
         </Form.Item>
 
         <Form.Item {...tailFormItemLayout}>
@@ -277,10 +235,16 @@ function DogEditScreen() {
                 <>&nbsp;&nbsp;</>
                 <Button type="danger" onClick={delClick}> Delete </Button>
                 <>&nbsp;&nbsp;</>
+              </>
+            ) : (<></>) : (<></>)
+          }
+          {
+            userInfo ? (
+              <>
                 <Button type="primary" style={{ background: "#28a745" }} onClick={addFav}> {fav_button} </Button>
                 <>&nbsp;&nbsp;</>
               </>
-            ) : (<></>) : (<></>)
+            ) : (<></>)
           }
           <Button htmlType="reset"><Link to="/"> Back </Link></Button>
         </Form.Item>
