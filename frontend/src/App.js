@@ -7,8 +7,7 @@ import { Store } from './Store';
 import DogScreen from './screen/DogScreen';
 import DogAddScreen from './screen/DogAddScreen';
 import DogEditScreen from './screen/DogEditScreen';
-import UserScreen from './screen/UserScreen';
-import UserEditScreen from './screen/UserEditScreen';
+import FavouriteListScreen from './screen/FavouriteListScreen';
 import SignInScreen from './screen/SignInScreen';
 import SignUpScreen from './screen/SignUpScreen';
 import NotFound from "./screen/NotFound";
@@ -34,13 +33,12 @@ export default function App() {
               <Link to="" className='disabled-link'>VT6003CEM Web API</Link>
             </Menu.Item>
             <Link to="/">Dog</Link>
-            {/* <Link to="/dog_add">Add Dog</Link> */}
-            {/* <Link to="/dog/:id">Edit Dog</Link> */}
-            <Link to="/user/:id">User Profile</Link>
-            <Link to="/user_edit/:id">Edit Profile</Link>
             {
               userInfo ? (
-                <Link to="#signout" onClick={signoutHandler}>Sign Out</Link>
+                <>
+                  <Link to="/favList">Favourite List</Link>
+                  <Link to="#signout" onClick={signoutHandler}>Sign Out</Link>
+                </>
               ) : (
                 <>
                   <Link to="/SignIn">Sign In</Link>
@@ -60,11 +58,10 @@ export default function App() {
           <Route path="/" element={<DogScreen />} />
           <Route path="/dog_add" element={<DogAddScreen />} />
           <Route path="/dog/:_id" element={<DogEditScreen />} />
-          {/* <Route path="/user/:id" element={<UserScreen />} /> */}
-          {/* <Route path="/user_edit/:id" element={<UserEditScreen />} /> */}
+          <Route path="/favList" element={<FavouriteListScreen />} />
           <Route path="/SignIn" element={<SignInScreen />} />
           <Route path="/SignUp" element={<SignUpScreen />} />
-          <Route path="*" element={<NotFound />} />
+          {/* <Route path="*" element={<NotFound />} /> */}
         </Routes>
       </Content>
     </Router >
