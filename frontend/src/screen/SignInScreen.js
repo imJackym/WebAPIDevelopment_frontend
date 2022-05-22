@@ -18,14 +18,12 @@ function SignInScreen() {
 
   async function handleSubmit() {
     try {
-      console.log(username)
-      console.log(password)
       const { data } = await Axios.post('http://localhost:5005/api/v1/user/login', {
         username,
         password,
       });
       if (data.status === 200) {
-        alert("Submit Success");
+        alert("Login Success");
         ctxDispatch({ type: 'USER_SIGNIN', payload: data });
         localStorage.setItem('userInfo', JSON.stringify(data));
         navigate(redirect || '/');
@@ -33,7 +31,7 @@ function SignInScreen() {
         alert(data.status);
       }
     } catch (error) {
-      alert("Submit Fail. Please retry");
+      alert("Login Fail. Please retry");
     }
   }
 
