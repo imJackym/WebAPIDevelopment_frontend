@@ -102,7 +102,7 @@ export default function DogScreen() {
           <div className="dog" key={`${dog.id}`}>
             <Link to={`/dog/${dog._id}`}>
               <Card.Grid style={gridStyle}>
-                <Card style={cardStyle} cover={<img alt="example" src="https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png" />}>
+                <Card style={cardStyle} cover={<img alt="Dog Img" src={`http://localhost:5005/public/images/${dog.image}`} />}>
                   <Meta title={`${dog.name}`} description={`${dog.breed}`} />
                 </Card>
               </Card.Grid>
