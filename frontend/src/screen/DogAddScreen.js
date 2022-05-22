@@ -12,7 +12,7 @@ function DogAddScreen() {
   const [description, setDescription] = useState("");
   const [adoption, setAdoption] = useState("");
   const [image, setImage] = useState("");
-  const [file, setFile] = useState("https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png");
+  const [file, setFile] = useState("");
   const [form] = Form.useForm();
 
   const { state } = useContext(Store);
@@ -116,12 +116,14 @@ function DogAddScreen() {
           <Input.TextArea showCount maxLength={100} />
         </Form.Item>
 
-        <Form.Item name="image" label="Image" onChange={(e) => setImage(e.target.value)}>
+        <Form.Item name="image" label="Image">
           <input type="file" name='pic' id='pic' onChange={handleUploadFile} />
         </Form.Item>
 
         <img src={file} />
-
+        
+        <br/>	&nbsp;
+        <br/>	&nbsp;
         <Form.Item {...tailFormItemLayout}>
           <Button type="primary" htmlType="submit"> Register </Button>
           &nbsp;&nbsp;
