@@ -32,6 +32,7 @@ function DogEditScreen() {
   const [description, setDescription] = useState("");
   const [adoption, setAdoption] = useState("");
   const [image, setImage] = useState("");
+  const [file, setFile] = useState("");
   const [fav_button, setFav_button] = useState("Add Favourite List");
 
   const formItemLayout = {
@@ -68,7 +69,15 @@ function DogEditScreen() {
           setBreed(result.data.breed)
           setDescription(result.data.description)
           setAdoption(result.data.adoption)
-          setImage(result.data.image)
+          if (result.data.image) {
+            console.log("ture")
+            console.log(result.data.image)
+            setImage(result.data.image)
+            setFile(result.data.image)
+          } else {
+            console.log("false")
+            setFile("https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png")
+          }
           if (userInfo != null) {
             let name = result.data.name
             const fav = await Axios.post(`http://localhost:5005/api/v1/user/favlist/`,
@@ -149,6 +158,7 @@ function DogEditScreen() {
       const result = await Axios.post(`http://localhost:5005/api/v1/dog/upload/`,
         bodyFormData, { headers: { Authorization: `Bearer ${userInfo.token}` }, }
       );
+      console.log("result.data.fullPath : " + result.data.fullPath)
       setImage(result.data.fullPath)
     } catch (err) {
       console.log("handleUploadFile err")
@@ -218,12 +228,12 @@ function DogEditScreen() {
           {userInfo ? (<Input.TextArea showCount maxLength={100} defaultValue={description} />) : (<Input.TextArea disabled showCount maxLength={100} defaultValue={description} />)}
         </Form.Item>
 
-        <Form.Item name="image" label="Image" onChange={(e) => setImage(e.target.value)}>
+        <Form.Item name="image" label="Image">
           {
             userInfo ? userInfo.isAdmin ? (
-              <input type="file" name='pic' id='pic' onChange={handleUploadFile}/>) : 
-              (<input disabled type="file" name='pic' id='pic'/>) : 
-              (<input disabled type="file" name='pic' id='pic'/>)
+              <input type="file" name='pic' id='pic' onChange={handleUploadFile} />) :
+              (<></>) :
+              (<></>)
           }
         </Form.Item>
 
