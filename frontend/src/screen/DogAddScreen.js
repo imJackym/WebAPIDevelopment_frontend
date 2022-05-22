@@ -43,7 +43,6 @@ function DogAddScreen() {
   };
 
   async function handleSubmit() {
-    console.log(userInfo.token)
     try {
       const data = await Axios.post('http://localhost:5005/api/v1/dog/',
         {
@@ -65,7 +64,6 @@ function DogAddScreen() {
       }
     } catch (err) {
       alert("Submit Fail. Please retry later.");
-      console.log(err);
     }
   };
 
@@ -88,7 +86,7 @@ function DogAddScreen() {
       setImage(result.data.fullPath)
       setFile(URL.createObjectURL(e.target.files[0]))
     } catch (err) {
-      console.log("handleUploadFile err")
+      console.log("handleUploadFile : " + err)
     }
   }
 

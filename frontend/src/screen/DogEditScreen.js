@@ -72,18 +72,13 @@ function DogEditScreen() {
           setAdoption(result.data.adoption)
           if (result.data.adoption) {
             setTxt("Adopted")
-            console.log("adoption true")
           } else {
             setTxt("Non-adopted")
-            console.log("adoption false")
           }
           if (result.data.image) {
-            console.log("ture")
-            console.log(result.data.image)
             setImage(result.data.image)
             setFile(result.data.image)
           } else {
-            console.log("false")
             setFile("https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png")
           }
           if (userInfo != null) {
@@ -133,7 +128,6 @@ function DogEditScreen() {
       }
     } catch (err) {
       alert("Submit Fail. Please retry later.");
-      console.log(err);
     }
   }
 
@@ -154,7 +148,6 @@ function DogEditScreen() {
       navigate("/");
     } catch (err) {
       alert("Delete Fail. Please content Admin.");
-      console.log(err);
     }
   }
 
@@ -166,23 +159,20 @@ function DogEditScreen() {
       const result = await Axios.post(`http://localhost:5005/api/v1/dog/upload/`,
         bodyFormData, { headers: { Authorization: `Bearer ${userInfo.token}` }, }
       );
-      console.log("result.data.fullPath : " + result.data.fullPath)
       setImage(result.data.fullPath)
     } catch (err) {
-      console.log("handleUploadFile err")
+      console.log("handleUploadFile : " + err)
     }
   }
 
   const addFav = async (value) => {
     const username = `${userInfo.name}`
-    console.log(`${userInfo.token}`)
     try {
       if (fav_button === "Add Favourite List") {
         const data = await Axios.post(`http://localhost:5005/api/v1/user/fav/${_id}`,
           { name: username },
           { headers: { Authorization: `Bearer ${userInfo.token}` }, }
         );
-        console.log(data)
         alert("Add to your favourite list")
         setFav_button("Remove Favourite List")
       } else if (fav_button === "Remove Favourite List") {
@@ -197,7 +187,6 @@ function DogEditScreen() {
       }
     } catch (err) {
       alert("Please try again later or content Admin.");
-      console.log(err);
     }
   }
 

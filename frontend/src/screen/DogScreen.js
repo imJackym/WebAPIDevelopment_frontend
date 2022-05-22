@@ -54,7 +54,6 @@ export default function DogScreen() {
         const result = await axios.get('http://localhost:5005/api/v1/dog');
         dispatch({ type: 'FETCH_SUCCESS', payload: result.data });
       } catch (error) {
-        console.log(error)
         dispatch({ type: 'FETCH_FAIL', payload: "ERROR" })
       }
     };
@@ -72,7 +71,6 @@ export default function DogScreen() {
           dispatch({ type: 'FETCH_SUCCESS', payload: result.data });
         }
       } catch (error) {
-        console.log(error)
         dispatch({ type: 'FETCH_FAIL', payload: "ERROR" })
       }
     };
