@@ -14,6 +14,7 @@ function SignUpScreen() {
   const [lname, setLname] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
+  const [icode, setIcode] = useState("");
 
   async function handleSubmit() {
     try {
@@ -22,6 +23,7 @@ function SignUpScreen() {
         lname,
         name,
         password,
+        icode
       });
       if (data.status === "register") {
         alert("Submit Success");
@@ -39,6 +41,14 @@ function SignUpScreen() {
 
   useEffect(() => {
   }, []);
+
+  const s_icode = (e) => {
+    if(e === "admin"){
+      setIcode("admin")
+    }else{
+      setIcode("")
+    }
+  }
 
   return (
     <Form name="basic" labelCol={{ span: 24 }} wrapperCol={{ span: 16 }} initialValues={{ remember: true }} onFinish={handleSubmit} autoComplete="off">
@@ -77,6 +87,12 @@ function SignUpScreen() {
         }),
         ]}>
         <Input.Password />
+      </Form.Item>
+
+      <Form.Item label="Invitation code" name="icode"
+        onChange={(e) => s_icode(e.target.value)}
+        rules={[{ required: false }]}>
+        <Input />
       </Form.Item>
 
       <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
