@@ -1,12 +1,13 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect,  } from 'react';
 import { Store } from '../Store';
 import { Form, Input, Button, Select } from 'antd';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Axios from 'axios';
 
 const { Option } = Select;
 
 function DogAddScreen() {
+  const navigate = useNavigate();
   const [name, setName] = useState("");
   const [breed, setBreed] = useState("");
   const [description, setDescription] = useState("");
@@ -56,9 +57,11 @@ function DogAddScreen() {
           headers: { Authorization: `Bearer ${userInfo.token}` },
         }
       );
+      console.log(image)
       if (data.status === 200) {
         alert("Submit Success.");
         form.resetFields()
+        navigate("/");
       } else {
         alert("Submit Fail. Please retry.");
       }
@@ -83,7 +86,7 @@ function DogAddScreen() {
       const result = await Axios.post(`http://localhost:5005/api/v1/dog/upload/`,
         bodyFormData, { headers: { Authorization: `Bearer ${userInfo.token}` }, }
       );
-      setImage(result.data.fullPath)
+      setImage(result.data)
       setFile(URL.createObjectURL(e.target.files[0]))
     } catch (err) {
       console.log("handleUploadFile : " + err)
@@ -118,18 +121,20 @@ function DogAddScreen() {
           <input type="file" name='pic' id='pic' onChange={handleUploadFile} />
         </Form.Item>
 
-        <img src={file} />
+        <Form.Item name="preview" label="Preview">
+          <img src={file} />
+        </Form.Item>
         
-        <br/>	&nbsp;
-        <br/>	&nbsp;
         <Form.Item {...tailFormItemLayout}>
           <Button type="primary" htmlType="submit"> Register </Button>
           &nbsp;&nbsp;
           <Button type="primary" danger htmlType="reset" onClick={onReset}> Reset </Button>
           &nbsp;&nbsp;
-          <Button htmlType="reset"><Link to="/dog"> Back </Link></Button>
+          <Button htmlType="reset"><Link to="/"> Back </Link></Button>
         </Form.Item>
       </Form>
+      <br/>	&nbsp;
+      <br/>	&nbsp;
     </div>
   );
 };

@@ -63,6 +63,7 @@ function DogEditScreen() {
   useEffect(() => {
     const fetchData = async () => {
       dispatch({ type: 'FETCH_REQUEST' });
+      console.log(_id)
       try {
         const result = await Axios.get(`http://localhost:5005/api/v1/dog/${_id}`);
         if (result.status === 200) {
@@ -79,7 +80,7 @@ function DogEditScreen() {
             setImage(result.data.image)
             setFile(result.data.image)
           } else {
-            setFile("https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png")
+            setFile("loading.jpg")
           }
           if (userInfo != null) {
             let name = userInfo.name
@@ -121,8 +122,10 @@ function DogEditScreen() {
       },
         { headers: { Authorization: `Bearer ${userInfo.token}` }, }
       );
+      console.log(image)
       if (data.status === 200) {
         alert("Submit Success.");
+        navigate("/");
       } else {
         alert("Submit Fail. Please retry.");
       }
@@ -159,7 +162,8 @@ function DogEditScreen() {
       const result = await Axios.post(`http://localhost:5005/api/v1/dog/upload/`,
         bodyFormData, { headers: { Authorization: `Bearer ${userInfo.token}` }, }
       );
-      setImage(result.data.fullPath)
+      await setImage(result.data)
+      await setFile(result.data)
     } catch (err) {
       console.log("handleUploadFile : " + err)
     }
@@ -174,7 +178,7 @@ function DogEditScreen() {
           { headers: { Authorization: `Bearer ${userInfo.token}` }, }
         );
         alert("Add to your favourite list")
-        setFav_button("Remove Favourite List")
+        await setFav_button("Remove Favourite List")
       } else if (fav_button === "Remove Favourite List") {
         const data = await Axios.post(`http://localhost:5005/api/v1/user/refav/${_id}`,
           { name: username },
@@ -183,7 +187,7 @@ function DogEditScreen() {
           }
         );
         alert("Remove to your favourite list")
-        setFav_button("Add Favourite List")
+        await setFav_button("Add Favourite List")
       }
     } catch (err) {
       alert("Please try again later or content Admin.");
@@ -243,10 +247,10 @@ function DogEditScreen() {
           }
         </Form.Item>
 
-        <img src={`http://localhost:5005/public/images/${file}`} />
+        <Form.Item label="Preview">
+          <img src={`http://localhost:5005/public/images/${file}`} />
+        </Form.Item>
 
-        <br/>	&nbsp;
-        <br/>	&nbsp;
         <Form.Item {...tailFormItemLayout}>
           {
             userInfo ? userInfo.isAdmin ? (
@@ -269,6 +273,9 @@ function DogEditScreen() {
           <Button htmlType="reset"><Link to="/"> Back </Link></Button>
         </Form.Item>
       </Form>
+      <br/>	&nbsp;
+      <br/>	&nbsp;
+
     </div>
   );
 }
