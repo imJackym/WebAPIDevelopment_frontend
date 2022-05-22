@@ -34,6 +34,7 @@ function DogEditScreen() {
   const [image, setImage] = useState("");
   const [file, setFile] = useState("");
   const [fav_button, setFav_button] = useState("Add Favourite List");
+  const [txt, setTxt] = useState("")
 
   const formItemLayout = {
     labelCol: {
@@ -69,6 +70,13 @@ function DogEditScreen() {
           setBreed(result.data.breed)
           setDescription(result.data.description)
           setAdoption(result.data.adoption)
+          if (result.data.adoption) {
+            setTxt("Adopted")
+            console.log("adoption true")
+          } else {
+            setTxt("Non-adopted")
+            console.log("adoption false")
+          }
           if (result.data.image) {
             console.log("ture")
             console.log(result.data.image)
@@ -79,7 +87,7 @@ function DogEditScreen() {
             setFile("https://gw.alipayobjects.com/zos/rmsportal/JiqGstEfoWAOHiTxclqi.png")
           }
           if (userInfo != null) {
-            let name = result.data.name
+            let name = userInfo.name
             const fav = await Axios.post(`http://localhost:5005/api/v1/user/favlist/`,
               { name },
               { headers: { Authorization: `Bearer ${userInfo.token}` }, }
@@ -92,10 +100,10 @@ function DogEditScreen() {
           }
           dispatch({ type: 'FETCH_SUCCESS', payload: result.data });
         } else {
-          dispatch({ type: 'FETCH_SUCCESS', payload: null });
+          dispatch({ type: 'FETCH_FAIL' });
         }
       } catch (err) {
-        dispatch({ type: 'FETCH_SUCCESS', payload: null });
+        dispatch({ type: 'FETCH_FAIL' });
       }
     };
     fetchData();
@@ -203,29 +211,38 @@ function DogEditScreen() {
 
         <Form.Item name="name" label="Nickname" onChange={(e) => setName(e.target.value)}
           rules={[{ required: true, message: 'Please input the dog nickname!', whitespace: true }]}>
-          {userInfo ? (<Input defaultValue={name} />) : (<Input disabled defaultValue={name} />)}
+          {userInfo ? userInfo.isAdmin ?
+            (<Input defaultValue={name} />) :
+            (name) :
+            (name)
+          }
         </Form.Item>
 
         <Form.Item name="adoption" label="Adoption" rules={[{ required: true, message: 'Please select status of adoption.' }]}>
-          {userInfo ? (
-            <Select defaultValue={adoptionValue} onChange={adoptionSelect}>
+          {userInfo ? userInfo.isAdmin ?
+            (<Select defaultValue={adoptionValue} onChange={adoptionSelect}>
               <Option value="true">Adopted</Option>
               <Option value="false">Non-adopted</Option>
-            </Select>
-          ) : (
-            <Select defaultValue={adoptionValue} disabled>
-              <Option value="true">Adopted</Option>
-              <Option value="false">Non-adopted</Option>
-            </Select>
-          )}
+            </Select>) :
+            (txt) :
+            (txt)
+          }
         </Form.Item>
 
         <Form.Item name="breed" label="Breed" onChange={(e) => setBreed(e.target.value)}>
-          {userInfo ? (<Input defaultValue={breed} />) : (<Input disabled defaultValue={breed} />)}
+          {userInfo ? userInfo.isAdmin ?
+            (<Input defaultValue={breed} />) :
+            (breed) :
+            (breed)
+          }
         </Form.Item>
 
         <Form.Item name="description" label="Description" onChange={(e) => setDescription(e.target.value)}>
-          {userInfo ? (<Input.TextArea showCount maxLength={100} defaultValue={description} />) : (<Input.TextArea disabled showCount maxLength={100} defaultValue={description} />)}
+          {userInfo ? userInfo.isAdmin ?
+            (<Input.TextArea showCount maxLength={100} defaultValue={description} />) :
+            (description) :
+            (description)
+          }
         </Form.Item>
 
         <Form.Item name="image" label="Image">
@@ -237,6 +254,10 @@ function DogEditScreen() {
           }
         </Form.Item>
 
+        <img src={`http://localhost:5005/public/images/${file}`} />
+
+        <br/>	&nbsp;
+        <br/>	&nbsp;
         <Form.Item {...tailFormItemLayout}>
           {
             userInfo ? userInfo.isAdmin ? (
